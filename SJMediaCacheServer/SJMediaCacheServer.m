@@ -75,7 +75,12 @@
         return nil;
     return [MCSPrefetcherManager.shared prefetchWithURL:URL preloadSize:preloadSize progress:progressBlock completed:completionBlock];
 }
-
+- (nullable id<MCSPrefetchTask>)prefetchWithHLSURL:(NSURL *)URL progress:(void(^_Nullable)(float progress))progressBlock completed:(void(^_Nullable)(NSError *_Nullable error))completionBlock{
+    if ( URL == nil )
+        return nil;
+    // numberOfPreloadFiles 必须大于1才有效，看源码看不出究竟
+    return [MCSPrefetcherManager.shared prefetchWithHLSURL:URL numberOfPreloadFiles:1 progress:progressBlock completed:completionBlock];
+}
 - (void)cancelCurrentRequestsForURL:(NSURL *)URL {
     if ( URL == nil )
         return;

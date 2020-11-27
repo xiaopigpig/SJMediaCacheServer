@@ -134,8 +134,12 @@
                 progress = _loadedLength * 1.0 / size;
             }
             else {
-                CGFloat curr = reader.offset / reader.response.range.length;
-                progress = (_fragmentIndex + curr) / _numberOfPreloadFiles;
+                if (_fragmentIndex == NSNotFound || reader.response.totalLength == 0) {
+                    progress = 0;
+                }else{
+                    CGFloat curr = reader.offset * 1.0 / reader.response.totalLength;
+                    progress = (_fragmentIndex + curr) / _asset.parser.TsCount;
+                }
             }
             
             if ( progress >= 1 ) progress = 1;

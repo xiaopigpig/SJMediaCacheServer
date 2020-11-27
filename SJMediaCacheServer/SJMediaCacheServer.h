@@ -62,7 +62,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// @note return nil if URL is nil.
 ///
 - (nullable id<MCSPrefetchTask>)prefetchWithURL:(NSURL *)URL preloadSize:(NSUInteger)bytes progress:(void(^_Nullable)(float progress))progressBlock completed:(void(^_Nullable)(NSError *_Nullable error))completionBlock; // 预加载
-
+/// 预加载HLS，并回调进度
+- (nullable id<MCSPrefetchTask>)prefetchWithHLSURL:(NSURL *)URL progress:(void(^_Nullable)(float progress))progressBlock completed:(void(^_Nullable)(NSError *_Nullable error))completionBlock;
 /// Cancel current requests for a asset, including prefetch requests.
 ///
 /// @param URL      An instance of NSURL that references a media asset.
