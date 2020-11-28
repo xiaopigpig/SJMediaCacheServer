@@ -64,11 +64,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable id<MCSPrefetchTask>)prefetchWithURL:(NSURL *)URL preloadSize:(NSUInteger)bytes progress:(void(^_Nullable)(float progress))progressBlock completed:(void(^_Nullable)(NSError *_Nullable error))completionBlock; // 预加载
 /// 预加载HLS，并回调进度
 - (nullable id<MCSPrefetchTask>)prefetchWithHLSURL:(NSURL *)URL progress:(void(^_Nullable)(float progress))progressBlock completed:(void(^_Nullable)(NSError *_Nullable error))completionBlock;
-/// Cancel current requests for a asset, including prefetch requests.
-///
-/// @param URL      An instance of NSURL that references a media asset.
-///
-- (void)cancelCurrentRequestsForURL:(NSURL *)URL; // 取消当前的请求, 包括预加载(MCSPrefetchTask)的请求
 
 /// Cancels all queued and executing prefetch tasks.
 ///
@@ -189,7 +184,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 @property (nonatomic, readonly) NSUInteger cachedSize; // 返回已占用的缓存大小
 
-- (BOOL)isCacheFinishedForURL:(NSURL *)URL;
+- (BOOL)isStoredForURL:(NSURL *)URL;
 
 @end 
 NS_ASSUME_NONNULL_END

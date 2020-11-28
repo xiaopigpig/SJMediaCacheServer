@@ -9,7 +9,6 @@
 #import "SJMediaCacheServer.h"
 #import "MCSProxyServer.h"
 #import "MCSAssetManager.h"
-#import "MCSAsset.h"
 #import "MCSURLRecognizer.h"
 #import "MCSProxyTask.h"
 #import "MCSLogger.h"
@@ -49,8 +48,10 @@
         return URL;
     
     // proxy URL
-    if ( _server.isRunning )
+    if ( _server.isRunning ) {
+        [MCSAssetManager.shared willReadAssetForURL:URL];
         return [MCSURLRecognizer.shared proxyURLWithURL:URL];
+    }
 
     // param URL
     return URL;
@@ -81,13 +82,6 @@
     // numberOfPreloadFiles 必须大于1才有效，看源码看不出究竟
     return [MCSPrefetcherManager.shared prefetchWithHLSURL:URL numberOfPreloadFiles:1 progress:progressBlock completed:completionBlock];
 }
-- (void)cancelCurrentRequestsForURL:(NSURL *)URL {
-    if ( URL == nil )
-        return;
-    MCSAsset *asset = [MCSAssetManager.shared assetWithURL:URL];
-    [MCSAssetManager.shared cancelCurrentReadsForAsset:asset];
-}
-
 - (void)cancelAllPrefetchTasks {
     [MCSPrefetcherManager.shared cancelAllPrefetchTasks];
 }
@@ -112,13 +106,13 @@
 - (void)assetURL:(NSURL *)URL setValue:(nullable NSString *)value forHTTPAdditionalHeaderField:(NSString *)field ofType:(MCSDataType)type {
     if ( URL == nil )
         return;
-    MCSAsset *asset = [MCSAssetManager.shared assetWithURL:URL];
+    id<MCSAsset> asset = [MCSAssetManager.shared assetWithURL:URL];
     [asset.configuration setValue:value forHTTPAdditionalHeaderField:field ofType:type];
 }
 - (nullable NSDictionary *)assetURL:(NSURL *)URL HTTPAdditionalHeadersForDataRequestsOfType:(MCSDataType)type {
     if ( URL == nil )
         return nil;
-    MCSAsset *asset = [MCSAssetManager.shared assetWithURL:URL];
+    id<MCSAsset> asset = [MCSAssetManager.shared assetWithURL:URL];
     return [asset.configuration HTTPAdditionalHeadersForDataRequestsOfType:type];
 }
 @end
@@ -222,10 +216,10 @@
     return [MCSAssetManager.shared cachedSizeForAssets];
 }
 
-- (BOOL)isCacheFinishedForURL:(NSURL *)URL {
+- (BOOL)isStoredForURL:(NSURL *)URL {
     if ( URL == nil )
         return NO;
-    MCSAsset *asset = [MCSAssetManager.shared assetWithURL:URL];
-    return asset.isCacheFinished;
+    id<MCSAsset> asset = [MCSAssetManager.shared assetWithURL:URL];
+    return asset.isStored;
 }
 @end

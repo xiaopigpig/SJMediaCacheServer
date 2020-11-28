@@ -17,6 +17,8 @@
 #import <SJMediaCacheServer/MCSPrefetcherManager.h>
 #import <SJBaseVideoPlayer/SJAVMediaPlaybackController.h>
 
+#import <SJBaseVideoPlayer/SJBaseVideoPlayerConst.h>
+
 #import <MCSDownload.h>
 
 static NSString *const DEMO_URL_HLS = @"http://hls.cntv.myalicdn.com/asp/hls/450/0303000a/3/default/bca293257d954934afadfaa96d865172/450.m3u8";
@@ -27,6 +29,9 @@ static NSString *const DEMO_URL_FILE = @"https://dh2.v.netease.com/2017/cg/fxtpt
 @end
 
 @implementation SJViewController
+- (IBAction)test:(id)sender {
+ 
+}
 
 - (BOOL)shouldAutorotate {
     return NO;
@@ -37,9 +42,11 @@ static NSString *const DEMO_URL_FILE = @"https://dh2.v.netease.com/2017/cg/fxtpt
     [self _setupViews];
     
     SJMediaCacheServer.shared.enabledConsoleLog = YES;
-    SJMediaCacheServer.shared.logOptions = MCSLogOptionPrefetcher;
-     
-//    [self _demo1];
+    SJMediaCacheServer.shared.logOptions = MCSLogOptionSQLite;
+    SJMediaCacheServer.shared.cacheCountLimit = 5;
+    
+    
+    [self _demo1];
 //    [self _demo2];
 //    [self _demo3];
 //    [self _demo4];
@@ -62,8 +69,6 @@ static NSString *const DEMO_URL_FILE = @"https://dh2.v.netease.com/2017/cg/fxtpt
     for ( NSString *url in urls ) {
         [self _prefetch:[NSURL URLWithString:url]];
     }
-    
-    SJMediaCacheServer.shared.maxConcurrentPrefetchCount = 15;
 }
 
 - (void)_demo3 {
@@ -90,6 +95,7 @@ static NSString *const DEMO_URL_FILE = @"https://dh2.v.netease.com/2017/cg/fxtpt
     }
     
     SJMediaCacheServer.shared.maxConcurrentPrefetchCount = 15;
+//    SJMediaCacheServer.shared.cacheCountLimit = 4;
 }
 
 - (void)_demo2 {
@@ -101,7 +107,7 @@ static NSString *const DEMO_URL_FILE = @"https://dh2.v.netease.com/2017/cg/fxtpt
 
 - (void)_demo1 {
     // play
-    NSString *url = DEMO_URL_FILE;
+    NSString *url = @"http://oss.f6978.hk/video/movie/20201027/e34509d6bd4b4d56b42044ceeef5a354/hls-10p.m3u8";
     NSURL *URL = [NSURL URLWithString:url];
     [self _play:URL];
 }
@@ -109,13 +115,15 @@ static NSString *const DEMO_URL_FILE = @"https://dh2.v.netease.com/2017/cg/fxtpt
 #pragma mark -
 
 - (void)_play:(NSURL *)URL {
+//    URL = [NSURL fileURLWithPath:[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject stringByAppendingPathComponent:@"com.SJMediaCacheServer.cache/87d5ff79f295648c071555a12fb412cc/file_0_0.mp4"]];
+    
     NSURL *playbackURL = [SJMediaCacheServer.shared playbackURLWithURL:URL];
     // play
     _player.URLAsset = [SJVideoPlayerURLAsset.alloc initWithURL:playbackURL startPosition:0];
 }
 
 - (void)_prefetch:(NSURL *)URL {
-    [SJMediaCacheServer.shared prefetchWithURL:URL preloadSize:20 * 1024 * 1024 progress:^(float progress) {
+    [SJMediaCacheServer.shared prefetchWithURL:URL preloadSize:1 * 1024 * 1024 progress:^(float progress) {
         
         // progress ...
         
