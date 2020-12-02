@@ -31,15 +31,16 @@ static dispatch_queue_t mcs_queue;
 @synthesize readDataDecoder = _readDataDecoder;
 @synthesize isClosed = _isClosed;
 @synthesize response = _response;
+@synthesize isPrepared = _isPrepared;
 
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        mcs_queue = dispatch_queue_create("queue.HLSContentTSReader", DISPATCH_QUEUE_CONCURRENT);
+        mcs_queue = dispatch_queue_create("queue.HLSReader", DISPATCH_QUEUE_CONCURRENT);
     });
 }
 
-- (instancetype)initWithAsset:(__weak HLSAsset *)asset request:(NSURLRequest *)request networkTaskPriority:(float)networkTaskPriority readDataDecoder:(NSData *(^)(NSURLRequest *request, NSUInteger offset, NSData *data))readDataDecoder delegate:(id<MCSAssetReaderDelegate>)delegate {
+- (instancetype)initWithAsset:(__weak HLSAsset *)asset request:(NSURLRequest *)request networkTaskPriority:(float)networkTaskPriority readDataDecoder:(NSData *(^_Nullable)(NSURLRequest *request, NSUInteger offset, NSData *data))readDataDecoder delegate:(id<MCSAssetReaderDelegate>)delegate {
     self = [super init];
     if ( self ) {
         _asset = asset;
@@ -123,6 +124,8 @@ static dispatch_queue_t mcs_queue;
 - (NSData *)readDataOfLength:(NSUInteger)length {
     __block NSData *data = nil;
     dispatch_barrier_sync(mcs_queue, ^{
+        if ( _reader.isDone || _isClosed ) return;
+        
         NSUInteger offset = _reader.offset;
         data = [_reader readDataOfLength:length];
         
@@ -178,7 +181,11 @@ static dispatch_queue_t mcs_queue;
 }
 
 - (BOOL)isPrepared {
-    return self.reader.isPrepared;
+    __block BOOL isPrepared = NO;
+    dispatch_sync(mcs_queue, ^{
+        isPrepared = _isPrepared;
+    });
+    return isPrepared;
 }
 
 - (BOOL)isReadingEndOfData {
@@ -211,6 +218,7 @@ static dispatch_queue_t mcs_queue;
 - (void)readerPrepareDidFinish:(id<MCSAssetDataReader>)reader {
     dispatch_barrier_sync(mcs_queue, ^{
         _response = [MCSResponse.alloc initWithTotalLength:reader.range.length contentType:[reader isKindOfClass:HLSContentTSReader.class] ? _asset.TsContentType : nil];
+        _isPrepared = YES;
     });
     [_delegate reader:self prepareDidFinish:self.response];
 }
